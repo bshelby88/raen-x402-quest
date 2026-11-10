@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>x402 Dev Quest — prove your agent can pay</title>
+<meta name="description" content="A 3-level challenge game for agent developers: decode a real HTTP 402 challenge, read its payment terms, settle a real $0.01 USDC payment on Base and prove it on-chain. Clear all three to claim a free RAEN MCP gateway dev key.">
+<style>
+:root{color-scheme:dark}
+body{margin:0;font:16px/1.6 ui-sans-serif,system-ui,sans-serif;background:#0b0e14;color:#d6e2f0}
+main{max-width:760px;margin:0 auto;padding:48px 20px}
+h1{font-size:2rem;color:#22d3ee}
+code{background:#151b26;padding:2px 6px;border-radius:4px;color:#7dd3fc}
+.card{background:#111725;border:1px solid #1f2a3a;border-radius:12px;padding:20px 24px;margin:20px 0}
+.badge{display:inline-block;background:#0e7490;color:#e0f2fe;font-size:.75rem;padding:2px 10px;border-radius:99px;margin-right:8px}
+button{background:#22d3ee;border:0;color:#04252b;font-weight:700;padding:10px 18px;border-radius:8px;cursor:pointer}
+input{background:#0b0e14;border:1px solid #2a3950;color:#d6e2f0;padding:10px;width:100%;border-radius:8px;font-family:ui-monospace,monospace}
+#out{white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:.85rem;color:#94e2ff;margin-top:12px}
+a{color:#22d3ee}
+</style>
+</head>
+<body>
+<main>
+<h1>⚔ x402 Dev Quest</h1>
+<p>Your agent needs to learn one skill: <strong>paying over HTTP</strong>. Prove you (and your agent) can do it in three live levels — no sandboxes, everything below hits the real RAEN x402 fleet.</p>
+<p class="badge">LEVEL 1 · DECODE</p>
+<div class="card">
+<p><code>POST https://dispatch-x402.fly.dev/api/analyze</code> with <code>{"text":"test"}</code> returns <code>HTTP 402</code> with a <code>payment-required</code> header containing base64url-encoded JSON. Decode it. Submit the <code>payTo</code> address from <code>accepts[0]</code>.</p>
+<p><strong>Submit:</strong> <code>/api/check?level=1&amp;a=&lt;payTo address&gt;</code></p>
+</div>
+<p class="badge">LEVEL 2 · READ THE TERMS</p>
+<div class="card">
+<p>Same challenge. Submit the exact price — the <code>amount</code> (a.k.a. <code>maxAmountRequired</code> in older x402 versions) in USDC atomic units — from <code>accepts[0]</code>. If you got this right, you already know what the call costs before you pay — that's the point of x402.</p>
+<p><strong>Submit:</strong> <code>/api/check?level=2&amp;a=&lt;atomic amount&gt;</code></p>
+</div>
+<p class="badge">LEVEL 3 · PAY AND PROVE</p>
+<div class="card">
+<p>Settle the payment (your x402 client handles it — see the <a href="https://github.com/bshelby88/x402-cookbook">x402 cookbook</a>) and complete the paid call. Then submit the transaction hash of the on-chain USDC transfer. We verify on Base mainnet that the payment really settled to the fleet wallet.</p>
+<p><strong>Submit:</strong> <code>/api/check?level=3&amp;a=&lt;tx hash&gt;</code></p>
+</div>
+<p class="badge">REWARD</p>
+<div class="card">
+<p>Clear all three and the checker returns a <strong>claim code</strong>. Redeem it for a free RAEN MCP gateway dev key at <a href="https://github.com/bshelby88/raen-bounties">github.com/bshelby88/raen-bounties</a> — open an issue with your code and your wallet address.</p>
+<p><em>CROA-compliant: nothing here is financial advice; you pay only the real price of one API call ($0.01).</em></p>
+</div>
+<div class="card">
+<h3 style="margin-top:0">Try level 1 right now</h3>
+<input id="ans" placeholder="0x… payTo address">
+<button onclick="chk()">Check</button>
+<div id="out"></div>
+</div>
+<script>
+async function chk(){
+  const a=document.getElementById('ans').value.trim();
+  const r=await fetch('/api/check?level=1&a='+encodeURIComponent(a));
+  document.getElementById('out').textContent=(await r.json()).msg;
+}
+</script>
+<p style="margin-top:32px">By <a href="https://raen.royalruby.io">RAEN — Royal Agentic Enterprises</a> · <a href="https://raen-mcp-gateway.fly.dev/mcp">MCP gateway</a> · <a href="https://raen.royalruby.io">blog</a></p>
+</main>
+</body>
+</html>
